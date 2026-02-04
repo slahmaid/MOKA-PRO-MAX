@@ -1045,85 +1045,7 @@
             });
         });
 
-        // ✅ ORDERS HANDLING (Google Sheets via Apps Script Web App)
-        // 1) Create a Google Sheet
-        // 2) Create Apps Script → Deploy as "Web app" (Execute as: Me, Who has access: Anyone)
-        // 3) Paste the Web App URL here:
-        const SHEETS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxYvv0VKD33vAudY7goIjjFOcuf7OnemYrhNpv59-7lLH7-bQ_KAqBEZC8m34jK23mo/exec';
-
-        async function sendOrderToGoogleSheet(payload){
-            // Using text/plain helps avoid CORS preflight in many setups.
-            return fetch(SHEETS_WEBAPP_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
-        }
-
-        function buildOrderPayload(form){
-            const fd = new FormData(form);
-
-            const name = (fd.get('name') || 'زبون').trim();
-            const city = (fd.get('city') || '').trim();
-            const phone = (fd.get('phone') || '').trim();
-            const conn = (fd.get('connection_type') || '').trim();
-            const offerRaw = fd.get('product_offer') || fd.get('product_offer_re') || '';
-
-            const offerText =
-                offerRaw === '1_camera' ? 'قطعة واحدة Moka Pro Max' :
-                offerRaw === '2_cameras' ? 'قطعتين Moka Pro Max' :
-                String(offerRaw || '').trim();
-
-            return {
-                name,
-                city,
-                phone,
-                offer: offerText,
-                connection: conn,
-                page: window.location.href,
-                ts: new Date().toISOString()
-            };
-        }
-
-        async function handleOrderSubmit(e){
-            e.preventDefault();
-            const form = e.currentTarget;
-
-            const payload = buildOrderPayload(form);
-
-            // Basic client-side validation
-            if(!payload.name || !payload.city || !payload.phone){
-                alert('عافاك عمر المعلومات كاملة (الاسم، المدينة، الهاتف).');
-                return;
-            }
-
-            // Send to Google Sheets
-            try {
-                if(!SHEETS_WEBAPP_URL || SHEETS_WEBAPP_URL.includes('PASTE_YOUR_GOOGLE')){
-                    console.warn('Missing SHEETS_WEBAPP_URL. Set your Google Apps Script Web App URL.');
-                } else {
-                    await sendOrderToGoogleSheet(payload);
-                }
-            } catch (err) {
-                console.warn('Sheets send failed:', err);
-                // We still continue to thank-you page.
-            }
-
-            // Redirect to thank you page (keeps the same UX)
-            const params = new URLSearchParams({
-                name: payload.name,
-                product: payload.offer,
-                connection: payload.connection
-            });
-
-            window.location.href = 'thank-you.html?' + params.toString();
-        }
-
-        // Attach handler to both forms
-        document.querySelectorAll('.purchaseForm').forEach(form => {
-            form.addEventListener('submit', handleOrderSubmit);
-        });
-// Simple urgency countdown (non-invasive)
+        // Simple urgency countdown (non-invasive)
         (function(){
             const el = document.getElementById('offerTimer');
             if(!el) return;
@@ -1164,6 +1086,94 @@
                 else cta.style.display = 'block';
             });
         })();
+
+        /* =========================================================
+           ✅ ORDERS HANDLING (Google Apps Script Web App)
+           ========================================================= */
+
+        const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbwYihu19WueTmlS2d2JycvsZeOToe-IyduC4TwOQp_FfiPFXylqLRrKWUxdJsfR9A/exec";
+        const NOTIFY_EMAIL   = "slahmaid@gmail.com";
+
+        function offerMeta(offerCode) {
+            if (offerCode === "2_cameras") {
+                return { label: "قطعتين Moka Pro Max", price: 1699 };
+            }
+            return { label: "قطعة واحدة Moka Pro Max", price: 899 };
+        }
+
+        function getSelectedRadio(form, names) {
+            for (const n of names) {
+                const el = form.querySelector(`input[name="${n}"]:checked`);
+                if (el) return el.value;
+            }
+            return null;
+        }
+
+        document.querySelectorAll("form.purchaseForm").forEach((form) => {
+            form.addEventListener("submit", async (ev) => {
+                ev.preventDefault();
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn ? submitBtn.textContent : "";
+
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = "… جاري تأكيد الطلب";
+                }
+
+                const name  = (form.querySelector('input[name="name"]')?.value || "").trim();
+                const city  = (form.querySelector('input[name="city"]')?.value || "").trim();
+                const phone = (form.querySelector('input[name="phone"]')?.value || "").trim();
+
+                const connection = form.querySelector('input[name="connection_type"]:checked')?.value || "—";
+
+                // top form uses product_offer, retarget uses product_offer_re
+                const offerCode = getSelectedRadio(form, ["product_offer", "product_offer_re"]) || "1_camera";
+                const meta = offerMeta(offerCode);
+
+                if (!name || !city || !phone) {
+                    alert("عفاك عمر الاسم والمدينة ورقم الهاتف ✅");
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalBtnText || "تأكيد الطلب الآن ✅ — الدفع عند الاستلام";
+                    }
+                    return;
+                }
+
+                const payload = {
+                    name,
+                    city,
+                    phone,
+                    connection_type: connection,
+                    offer_code: offerCode,
+                    offer_label: meta.label,
+                    price: meta.price,
+                    page: location.href,
+                    user_agent: navigator.userAgent,
+                    notify_email: NOTIFY_EMAIL
+                };
+
+                try {
+                    // Best compatibility with Apps Script: no-cors
+                    await fetch(ORDER_ENDPOINT, {
+                        method: "POST",
+                        mode: "no-cors",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    });
+                } catch (e) {
+                    console.error("Order submit error:", e);
+                    // We still redirect so the customer experience stays smooth
+                }
+
+                // Redirect to thank-you with params (your thank-you.html reads these)
+                const url = new URL("thank-you.html", location.origin);
+                url.searchParams.set("name", name);
+                url.searchParams.set("product", meta.label);
+                url.searchParams.set("connection", connection);
+                window.location.href = url.toString();
+            });
+        });
     </script>
 
     <div class="mobile-cta" id="mobileCta">
