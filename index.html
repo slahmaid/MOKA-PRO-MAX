@@ -1045,61 +1045,85 @@
             });
         });
 
-        // ✅ FINAL SUBMIT → REDIRECT TO THANK YOU PAGE (passes name + offer + connection)
-        const SHEETS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxYvv0VKD33vAudY7goIjjFOcuf7OnemYrhNpv59-7lLH7-bQ_KAqBEZC8m34jK23mo/exec';
+        // ✅ ORDERS HANDLING (Google Sheets via Apps Script Web App)
+        // 1) Create a Google Sheet
+        // 2) Create Apps Script → Deploy as "Web app" (Execute as: Me, Who has access: Anyone)
+        // 3) Paste the Web App URL here:
+        const SHEETS_WEBAPP_URL = 'PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEBAPP_URL_HERE';
 
-        document.querySelectorAll('.purchaseForm').forEach(form => {
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                const fd = new FormData(form);
-
-                const name = (fd.get('name') || 'زبون').trim();
-                const city = (fd.get('city') || '').trim();
-                const phone = (fd.get('phone') || '').trim();
-                const conn = (fd.get('connection_type') || '').trim();
-                const offerRaw = fd.get('product_offer') || fd.get('product_offer_re') || '';
-
-                const offerText =
-                    offerRaw === '1_camera' ? 'قطعة واحدة Moka Pro Max' :
-                    offerRaw === '2_cameras' ? 'قطعتين Moka Pro Max' :
-                    offerRaw;
-
-                // Send order to Google Sheets (Apps Script Web App)
-                try {
-                    await fetch(SHEETS_WEBAPP_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({
-                            name,
-                            city,
-                            phone,
-                            offer: offerText,
-                            connection: conn,
-                            page: window.location.href,
-                            ts: new Date().toISOString()
-                        })
-                    });
-                } catch (err) {
-                    // If sending fails, we still continue to thank-you page.
-                    // Uncomment to block redirect on failure:
-                    // alert('تعذر إرسال الطلب، حاول مرة أخرى.');
-                    // return;
-                    console.warn('Sheets send failed:', err);
-                }
-
-                // Redirect to thank you page
-                const params = new URLSearchParams({
-                    name: name,
-                    product: offerText,
-                    connection: conn
-                });
-
-                window.location.href = 'thank-you.html?' + params.toString();
+        async function sendOrderToGoogleSheet(payload){
+            // Using text/plain helps avoid CORS preflight in many setups.
+            return fetch(SHEETS_WEBAPP_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
             });
-        });
+        }
 
-        // Simple urgency countdown (non-invasive)
+        function buildOrderPayload(form){
+            const fd = new FormData(form);
+
+            const name = (fd.get('name') || 'زبون').trim();
+            const city = (fd.get('city') || '').trim();
+            const phone = (fd.get('phone') || '').trim();
+            const conn = (fd.get('connection_type') || '').trim();
+            const offerRaw = fd.get('product_offer') || fd.get('product_offer_re') || '';
+
+            const offerText =
+                offerRaw === '1_camera' ? 'قطعة واحدة Moka Pro Max' :
+                offerRaw === '2_cameras' ? 'قطعتين Moka Pro Max' :
+                String(offerRaw || '').trim();
+
+            return {
+                name,
+                city,
+                phone,
+                offer: offerText,
+                connection: conn,
+                page: window.location.href,
+                ts: new Date().toISOString()
+            };
+        }
+
+        async function handleOrderSubmit(e){
+            e.preventDefault();
+            const form = e.currentTarget;
+
+            const payload = buildOrderPayload(form);
+
+            // Basic client-side validation
+            if(!payload.name || !payload.city || !payload.phone){
+                alert('عافاك عمر المعلومات كاملة (الاسم، المدينة، الهاتف).');
+                return;
+            }
+
+            // Send to Google Sheets
+            try {
+                if(!SHEETS_WEBAPP_URL || SHEETS_WEBAPP_URL.includes('PASTE_YOUR_GOOGLE')){
+                    console.warn('Missing SHEETS_WEBAPP_URL. Set your Google Apps Script Web App URL.');
+                } else {
+                    await sendOrderToGoogleSheet(payload);
+                }
+            } catch (err) {
+                console.warn('Sheets send failed:', err);
+                // We still continue to thank-you page.
+            }
+
+            // Redirect to thank you page (keeps the same UX)
+            const params = new URLSearchParams({
+                name: payload.name,
+                product: payload.offer,
+                connection: payload.connection
+            });
+
+            window.location.href = 'thank-you.html?' + params.toString();
+        }
+
+        // Attach handler to both forms
+        document.querySelectorAll('.purchaseForm').forEach(form => {
+            form.addEventListener('submit', handleOrderSubmit);
+        });
+// Simple urgency countdown (non-invasive)
         (function(){
             const el = document.getElementById('offerTimer');
             if(!el) return;
