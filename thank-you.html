@@ -2,19 +2,10 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>شكراً لطلبك | Prumysl</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Preload critical resources -->
-    <link rel="preload" href="style.css" as="style">
-    <link rel="preload" href="img/logo.png" as="image">
-    
-    <link rel="stylesheet" href="style.css">
-
     <script>
     !function(f,b,e,v,n,t,s)
     {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -24,141 +15,49 @@
     t.src=v;s=b.getElementsByTagName(e)[0];
     s.parentNode.insertBefore(t,s)}(window, document,'script',
     'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '740114099139411');
+    fbq('init', 'YOUR_PIXEL_ID_HERE'); // ← REPLACE WITH YOUR ID
     fbq('track', 'PageView');
+    fbq('track', 'Purchase', {currency: "MAD", value: 899.00}); // Standard event for conversion
     </script>
     <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=740114099139411&ev=PageView&noscript=1"
+    src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID_HERE&ev=PageView&noscript=1"
     /></noscript>
     <style>
-        body {
-            background-color: #f9f9f9;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .thank-you-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-        }
-        .success-card {
-            background: white;
-            padding: 50px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            text-align: center;
-            max-width: 600px;
-            width: 100%;
-        }
-        .success-icon {
-            width: 80px;
-            height: 80px;
-            background: #e8f5e9;
-            color: #2e7d32;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            margin: 0 auto 25px;
-        }
-        .success-card h1 {
-            color: #333;
-            font-size: 2.2rem;
-            margin-bottom: 15px;
-        }
-        .success-card p {
-            color: #666;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        .order-details {
-            background: #f4f4f4;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            font-weight: 600;
-            color: #0056b3;
-        }
-        .site-footer {
-            margin-top: auto;
-        }
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; text-align: center; padding: 50px 20px; color: #333; }
+        .success-card { background: white; max-width: 500px; margin: 0 auto; padding: 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); }
+        .icon { font-size: 60px; color: #28a745; margin-bottom: 20px; }
+        h1 { font-weight: 900; color: #111; margin-bottom: 10px; }
+        p { font-size: 1.1rem; color: #555; line-height: 1.6; }
+        .details-box { background: #f0f7ff; border: 1px solid #d0e4ff; padding: 20px; border-radius: 16px; margin: 30px 0; text-align: right; }
+        .details-box div { margin-bottom: 8px; font-weight: 700; }
+        .details-box span { color: #202895; }
+        .home-btn { display: inline-block; background: #202895; color: white; padding: 15px 30px; border-radius: 12px; text-decoration: none; font-weight: 800; transition: 0.3s; }
+        .home-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(32,40,149,0.2); }
     </style>
 </head>
 <body>
+    <div class="success-card">
+        <div class="icon">✅</div>
+        <h1>شكراً <span id="cust-name">يا بطل</span>!</h1>
+        <p>تم استلام طلبك بنجاح. سنقوم بالاتصال بك قريباً جداً لتأكيد الشحن.</p>
 
-    <header class="site-header">
-        <div class="header-logo" style="margin: 0 auto;">
-            <a href="index.html">
-                <img src="img/logo.png" alt="شعار Prumysl" width="150" height="50" loading="eager">
-            </a>
+        <div class="details-box">
+            <div>المنتج: <span id="prod-val">...</span></div>
+            <div>النوع: <span id="conn-val">...</span></div>
+            <div>التوصيل: <span>مجاني 🚚</span></div>
         </div>
-    </header>
 
-    <div class="thank-you-container">
-        <div class="success-card">
-            <div class="success-icon">✓</div>
-            <h1>شكراً لك يا <span id="customer-name">عزيزي</span>!</h1>
-            
-            <p>تم استلام طلبك بنجاح. سيتصل بك فريقنا في أقرب وقت (غالباً خلال 24 ساعة) لتأكيد العنوان وموعد التوصيل.</p>
-
-            <div class="order-details">
-                المنتج المطلوب: <span id="product-name">...</span><br>
-                نوع الاتصال: <span id="connection-type">...</span>
-            </div>
-
-            <a href="index.html" class="btn-primary" style="display: inline-block; text-decoration: none;">العودة للصفحة الرئيسية</a>
-        </div>
+        <a href="index.html" class="home-btn">العودة للرئيسية</a>
     </div>
 
-    <footer class="site-footer">
-        <div class="container">
-            <div class="footer-copyright" style="text-align: center;">
-                <p>جميع الحقوق محفوظة © 2026 Prumysl</p>
-            </div>
-        </div>
-    </footer>
-
     <script>
-        // Ensure all images are visible
-        document.addEventListener('DOMContentLoaded', function() {
-            const allImages = document.querySelectorAll('img');
-            allImages.forEach(function(img) {
-                img.style.opacity = '1';
-                if (!img.complete) {
-                    img.onload = function() { this.style.opacity = '1'; };
-                    img.onerror = function() { this.style.opacity = '1'; };
-                }
-            });
-        });
-
-        // Get parameters from the URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const product = urlParams.get('product');
-        const name = urlParams.get('name');
-        const connection = urlParams.get('connection');
-
-        // Update the page content dynamically
-        if (product) {
-            document.getElementById('product-name').textContent = product;
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('name')) document.getElementById('cust-name').innerText = params.get('name').split(' ')[0];
+        if(params.get('product')) {
+            const prod = params.get('product') === '1_camera' ? 'قطعة واحدة Moka Pro Max' : 'قطعتين Moka Pro Max';
+            document.getElementById('prod-val').innerText = prod;
         }
-        if (connection) {
-            document.getElementById('connection-type').textContent = connection;
-        } else {
-            // Hide the line if not provided (keeps page clean)
-            const el = document.getElementById('connection-type');
-            if (el) el.textContent = '—';
-        }
-        if (name) {
-            // Take only the first name for a friendlier touch
-            const firstName = name.split(' ')[0];
-            document.getElementById('customer-name').textContent = firstName;
-        }
+        if(params.get('connection')) document.getElementById('conn-val').innerText = params.get('connection');
     </script>
-
 </body>
 </html>
