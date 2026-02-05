@@ -179,7 +179,6 @@
             font-size: 0.95rem;
         }
 
-        /* ✅ NEW: CONNECTION SELECTOR */
         .conn-box{
             background: var(--primary-white);
             border: 2px solid #e6e6e6;
@@ -250,7 +249,6 @@
             opacity:.92;
         }
 
-        /* ✅ OFFERS GRID */
         .offers-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -289,7 +287,6 @@
             height: 18px;
         }
 
-        /* ✅ 1:1 image box (NO HOVER EFFECTS) */
         .offer-thumb {
             width: 100%;
             aspect-ratio: 1 / 1;
@@ -566,7 +563,6 @@
             .urgency-box .line1 { font-size: 0.92rem; }
             .urgency-box .line2 { font-size: 0.82rem; line-height: 1.6; }
 
-            /* ✅ MOBILE: 2 per row */
             .offers-container { grid-template-columns: 1fr 1fr; gap: 10px; }
 
             .offer-card { padding: 10px; border-radius: 14px; }
@@ -604,7 +600,6 @@
             .trust-badges { grid-template-columns: 1fr; gap: 12px; }
             .footer-links a { display: inline-block; padding: 10px 6px; }
 
-            /* connection selector: stack nicer */
             .conn-grid{ grid-template-columns: 1fr; }
         }
 
@@ -692,8 +687,7 @@
                 <div class="timer" id="offerTimer">⏳ العرض كيسالي ف: 10:00</div>
             </div>
 
-            <form class="order-form purchaseForm">
-                <!-- ✅ NEW: CONNECTION TYPE -->
+            <form class="order-form" id="main-order-form">
                 <div class="conn-box">
                     <div class="conn-title">📡 اختار نوع الاتصال</div>
                     <div class="conn-grid">
@@ -719,11 +713,9 @@
                 <div class="offers-container">
                     <label class="offer-card active">
                         <input type="radio" name="product_offer" value="1_camera" checked>
-
                         <div class="offer-thumb">
                             <img src="img/O-1.jpg" alt="عرض قطعة واحدة">
                         </div>
-
                         <span class="offer-name">قطعة واحدة Moka Pro Max</span>
                         <span class="offer-price">899 درهم</span>
                         <span class="offer-micro">✅ مناسبة للدار/الكراج/السطح — <b>ركّبها وخليها تخدم بوحدها</b></span>
@@ -732,11 +724,9 @@
                     <label class="offer-card">
                         <span class="best-seller">الأكثر طلباً ⭐</span>
                         <input type="radio" name="product_offer" value="2_cameras">
-
                         <div class="offer-thumb">
                             <img src="img/O-2.jpg" alt="عرض قطعتين">
                         </div>
-
                         <span class="offer-name">قطعتين Moka Pro Max (توفير كبير)</span>
                         <span class="offer-price">1699 درهم</span>
                         <span class="offer-micro">💥 تغطية أكبر بزاف (واجهتين/مدخلين) — <b>أفضل قيمة</b></span>
@@ -913,8 +903,7 @@
                 ماتخليش “غادي نشري من بعد”… <span style="color:#e63946;">النهار اللي كتحتاجها فيه هو نفس النهار اللي كتكون فيه متأخر</span>.
             </p>
 
-            <form class="order-form purchaseForm">
-                <!-- ✅ NEW: CONNECTION TYPE (retarget form) -->
+            <form class="order-form" id="retarget-order-form">
                 <div class="conn-box">
                     <div class="conn-title">📡 اختار نوع الاتصال</div>
                     <div class="conn-grid">
@@ -939,12 +928,10 @@
 
                 <div class="offers-container">
                     <label class="offer-card active">
-                        <input type="radio" name="product_offer_re" value="1_camera" checked>
-
+                        <input type="radio" name="product_offer" value="1_camera" checked>
                         <div class="offer-thumb">
                             <img src="img/O-1.jpg" alt="عرض قطعة واحدة">
                         </div>
-
                         <span class="offer-name">قطعة واحدة Moka Pro Max</span>
                         <span class="offer-price">899 درهم</span>
                         <span class="offer-micro">✅ حل سريع وفعّال — <b>حارس شخصي ليل ونهار</b></span>
@@ -952,12 +939,10 @@
 
                     <label class="offer-card">
                         <span class="best-seller">🔥 Best Deal</span>
-                        <input type="radio" name="product_offer_re" value="2_cameras">
-
+                        <input type="radio" name="product_offer" value="2_cameras">
                         <div class="offer-thumb">
                             <img src="img/O-2.jpg" alt="عرض قطعتين">
                         </div>
-
                         <span class="offer-name">قطعتين Moka Pro Max + الهدايا</span>
                         <span class="offer-price">1699 درهم</span>
                         <span class="offer-micro">💥 تغطية مضاعفة + راحة بال أكبر — <b>الناس كياخدوها بزاف</b></span>
@@ -1019,10 +1004,19 @@
         </div>
     </footer>
 
+    <div class="mobile-cta" id="mobileCta">
+        <div class="cta-wrap">
+            <div class="mini">🚚 توصيل مجاني <b>+ الدفع عند الاستلام</b> — دير الطلب دابا</div>
+            <button class="cta-btn" type="button" id="goToOrder">اطلب دابا ✅</button>
+        </div>
+    </div>
+
     <script>
-        // Universal Selection Logic (offers)
-        const cards = document.querySelectorAll('.offer-card');
-        cards.forEach(card => {
+        // CONFIG: Google Script URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBpo7EuxOVf5C5UDd8el7t9tiFBe1MCxXpoV4YCcg8k7wgrAnNgMVl58InONqep_U/exec";
+
+        // Offers Selection logic
+        document.querySelectorAll('.offer-card').forEach(card => {
             card.addEventListener('click', () => {
                 const parent = card.parentElement;
                 parent.querySelectorAll('.offer-card').forEach(c => c.classList.remove('active'));
@@ -1032,7 +1026,7 @@
             });
         });
 
-        // ✅ NEW: Connection selection logic (scoped per conn-grid)
+        // Connection selection logic
         document.querySelectorAll('.conn-grid').forEach(grid => {
             const connCards = grid.querySelectorAll('.conn-card');
             connCards.forEach(card => {
@@ -1045,7 +1039,14 @@
             });
         });
 
-        // Simple urgency countdown (non-invasive)
+        // FAQ Accordion logic
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.addEventListener('click', () => {
+                q.parentElement.classList.toggle('active');
+            });
+        });
+
+        // Urgency countdown timer
         (function(){
             const el = document.getElementById('offerTimer');
             if(!el) return;
@@ -1054,13 +1055,13 @@
                 const m = String(Math.floor(total / 60)).padStart(2,'0');
                 const s = String(total % 60).padStart(2,'0');
                 el.textContent = `⏳ العرض كيسالي ف: ${m}:${s}`;
-                total = Math.max(0, total - 1);
+                if (total > 0) total--;
             };
             tick();
             setInterval(tick, 1000);
         })();
 
-        // Sticky Mobile CTA logic
+        // Sticky Mobile CTA Scroll behavior
         (function(){
             const cta = document.getElementById('mobileCta');
             const btn = document.getElementById('goToOrder');
@@ -1073,115 +1074,51 @@
                 order.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
 
-            const io = new IntersectionObserver((entries) => {
-                const inView = entries[0] && entries[0].isIntersecting;
+            window.addEventListener('scroll', () => {
                 if(!isSmall()) { cta.style.display = 'none'; return; }
+                const rect = order.getBoundingClientRect();
+                const inView = rect.top < window.innerHeight && rect.bottom > 0;
                 cta.style.display = inView ? 'none' : 'block';
-            }, { threshold: 0.15 });
-
-            io.observe(order);
-
-            window.addEventListener('resize', () => {
-                if(!isSmall()) cta.style.display = 'none';
-                else cta.style.display = 'block';
             });
         })();
 
-        /* =========================================================
-           ✅ ORDERS HANDLING (Google Apps Script Web App)
-           ========================================================= */
+        // FORM SUBMISSION LOGIC
+        const handleFormSubmit = (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = form.querySelector('.submit-btn');
+            
+            // Visual feedback
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
+            submitBtn.innerText = "جاري الإرسال... ⏳";
 
-        const ORDER_ENDPOINT = "https://script.google.com/macros/s/AKfycbwYihu19WueTmlS2d2JycvsZeOToe-IyduC4TwOQp_FfiPFXylqLRrKWUxdJsfR9A/exec";
-        const NOTIFY_EMAIL   = "slahmaid@gmail.com";
+            // Prepare Data
+            const formData = new FormData(form);
 
-        function offerMeta(offerCode) {
-            if (offerCode === "2_cameras") {
-                return { label: "قطعتين Moka Pro Max", price: 1699 };
-            }
-            return { label: "قطعة واحدة Moka Pro Max", price: 899 };
-        }
-
-        function getSelectedRadio(form, names) {
-            for (const n of names) {
-                const el = form.querySelector(`input[name="${n}"]:checked`);
-                if (el) return el.value;
-            }
-            return null;
-        }
-
-        document.querySelectorAll("form.purchaseForm").forEach((form) => {
-            form.addEventListener("submit", async (ev) => {
-                ev.preventDefault();
-
-                const submitBtn = form.querySelector('button[type="submit"]');
-                const originalBtnText = submitBtn ? submitBtn.textContent : "";
-
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = "… جاري تأكيد الطلب";
-                }
-
-                const name  = (form.querySelector('input[name="name"]')?.value || "").trim();
-                const city  = (form.querySelector('input[name="city"]')?.value || "").trim();
-                const phone = (form.querySelector('input[name="phone"]')?.value || "").trim();
-
-                const connection = form.querySelector('input[name="connection_type"]:checked')?.value || "—";
-
-                // top form uses product_offer, retarget uses product_offer_re
-                const offerCode = getSelectedRadio(form, ["product_offer", "product_offer_re"]) || "1_camera";
-                const meta = offerMeta(offerCode);
-
-                if (!name || !city || !phone) {
-                    alert("عفاك عمر الاسم والمدينة ورقم الهاتف ✅");
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = originalBtnText || "تأكيد الطلب الآن ✅ — الدفع عند الاستلام";
-                    }
-                    return;
-                }
-
-                const payload = {
-                    name,
-                    city,
-                    phone,
-                    connection_type: connection,
-                    offer_code: offerCode,
-                    offer_label: meta.label,
-                    price: meta.price,
-                    page: location.href,
-                    user_agent: navigator.userAgent,
-                    notify_email: NOTIFY_EMAIL
-                };
-
-                try {
-                    // Best compatibility with Apps Script: no-cors
-                    await fetch(ORDER_ENDPOINT, {
-                        method: "POST",
-                        mode: "no-cors",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload)
-                    });
-                } catch (e) {
-                    console.error("Order submit error:", e);
-                    // We still redirect so the customer experience stays smooth
-                }
-
-                // Redirect to thank-you with params (your thank-you.html reads these)
-                const url = new URL("thank-you.html", location.origin);
-                url.searchParams.set("name", name);
-                url.searchParams.set("product", meta.label);
-                url.searchParams.set("connection", connection);
-                window.location.href = url.toString();
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                alert('شكراً لك! تم استلام طلبك بنجاح. سنتصل بك قريباً لتأكيد العنوان.');
+                form.reset();
+                // Reset visual state
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.innerText = "تأكيد الطلب الآن ✅ — الدفع عند الاستلام";
+            })
+            .catch(error => {
+                console.error('Submission Error:', error);
+                alert('عذراً، وقع خطأ في الإرسال. يرجى المحاولة مرة أخرى.');
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.innerText = "تأكيد الطلب الآن ✅ — الدفع عند الاستلام";
             });
-        });
+        };
+
+        document.getElementById('main-order-form').addEventListener('submit', handleFormSubmit);
+        document.getElementById('retarget-order-form').addEventListener('submit', handleFormSubmit);
     </script>
-
-    <div class="mobile-cta" id="mobileCta">
-        <div class="cta-wrap">
-            <div class="mini">🚚 توصيل مجاني <b>+ الدفع عند الاستلام</b> — دير الطلب دابا</div>
-            <button class="cta-btn" type="button" id="goToOrder">اطلب دابا ✅</button>
-        </div>
-    </div>
-
 </body>
 </html>
