@@ -15,6 +15,21 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', 'YOUR_PIXEL_ID_HERE'); // ← REPLACE WITH YOUR ID
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID_HERE&ev=PageView&noscript=1"
+    /></noscript>
     <style>
         :root {
             --primary-black: #000000;
@@ -1012,7 +1027,7 @@
     </div>
 
     <script>
-        // CONFIG: Google Script URL
+        // CONFIG
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBpo7EuxOVf5C5UDd8el7t9tiFBe1MCxXpoV4YCcg8k7wgrAnNgMVl58InONqep_U/exec";
 
         // Offers Selection logic
@@ -1082,43 +1097,38 @@
             });
         })();
 
-        // FORM SUBMISSION LOGIC
-        const handleFormSubmit = (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const submitBtn = form.querySelector('.submit-btn');
-            
-            // Visual feedback
-            submitBtn.disabled = true;
-            submitBtn.style.opacity = '0.7';
-            submitBtn.innerText = "جاري الإرسال... ⏳";
+        // FORM SUBMISSION + PIXEL EVENT
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+                const submitBtn = form.querySelector('.submit-btn');
+                submitBtn.disabled = true;
+                submitBtn.innerText = "جاري الإرسال...";
 
-            // Prepare Data
-            const formData = new FormData(form);
+                const formData = new FormData(form);
 
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => {
-                alert('شكراً لك! تم استلام طلبك بنجاح. سنتصل بك قريباً لتأكيد العنوان.');
-                form.reset();
-                // Reset visual state
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = '1';
-                submitBtn.innerText = "تأكيد الطلب الآن ✅ — الدفع عند الاستلام";
-            })
-            .catch(error => {
-                console.error('Submission Error:', error);
-                alert('عذراً، وقع خطأ في الإرسال. يرجى المحاولة مرة أخرى.');
-                submitBtn.disabled = false;
-                submitBtn.style.opacity = '1';
-                submitBtn.innerText = "تأكيد الطلب الآن ✅ — الدفع عند الاستلام";
+                fetch(SCRIPT_URL, { method: 'POST', body: formData })
+                .then(response => {
+                    // Fire Meta Pixel Lead Event
+                    if(typeof fbq !== 'undefined') {
+                        fbq('track', 'Lead');
+                    }
+                    
+                    const name = formData.get('name');
+                    const product = formData.get('product_offer');
+                    const connection = formData.get('connection_type');
+                    
+                    // Redirect to Thank You Page with Data
+                    window.location.href = `thank-you.html?name=${encodeURIComponent(name)}&product=${encodeURIComponent(product)}&connection=${encodeURIComponent(connection)}`;
+                })
+                .catch(error => {
+                    console.error('Error!', error.message);
+                    alert('وقع خطأ، يرجى المحاولة مرة أخرى.');
+                    submitBtn.disabled = false;
+                });
             });
-        };
-
-        document.getElementById('main-order-form').addEventListener('submit', handleFormSubmit);
-        document.getElementById('retarget-order-form').addEventListener('submit', handleFormSubmit);
+        });
     </script>
 </body>
 </html>
